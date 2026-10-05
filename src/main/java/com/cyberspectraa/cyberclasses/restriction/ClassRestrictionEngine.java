@@ -50,35 +50,35 @@ public final class ClassRestrictionEngine {
                 || stack == null
                 || stack.isEmpty()
                 || stack.is(UNRESTRICTED)) {
-            return RestrictionResult.allowed();
+            return RestrictionResult.permit();
         }
 
         PlayerClass playerClass =
             ClassManager.getClass(player).orElse(null);
 
         if (playerClass == null) {
-            return RestrictionResult.allowed();
+            return RestrictionResult.permit();
         }
 
         WeaponType type = weaponType(stack);
 
         return switch (type) {
             case SWORD -> playerClass.allowsSwords()
-                ? RestrictionResult.allowed()
+                ? RestrictionResult.permit()
                 : RestrictionResult.denied("swords");
             case AXE -> playerClass.allowsAxes()
-                ? RestrictionResult.allowed()
+                ? RestrictionResult.permit()
                 : RestrictionResult.denied("axes");
             case RANGED -> playerClass.allowsRanged()
-                ? RestrictionResult.allowed()
+                ? RestrictionResult.permit()
                 : RestrictionResult.denied("ranged weapons");
             case MAGIC -> playerClass.allowsMagic()
-                ? RestrictionResult.allowed()
+                ? RestrictionResult.permit()
                 : RestrictionResult.denied("magic");
             case SHIELD -> playerClass.allowsShields()
-                ? RestrictionResult.allowed()
+                ? RestrictionResult.permit()
                 : RestrictionResult.denied("shields");
-            case OTHER -> RestrictionResult.allowed();
+            case OTHER -> RestrictionResult.permit();
         };
     }
 
@@ -91,20 +91,20 @@ public final class ClassRestrictionEngine {
                 || stack == null
                 || stack.isEmpty()
                 || !slot.isArmor()) {
-            return RestrictionResult.allowed();
+            return RestrictionResult.permit();
         }
 
         PlayerClass playerClass =
             ClassManager.getClass(player).orElse(null);
 
         if (playerClass == null) {
-            return RestrictionResult.allowed();
+            return RestrictionResult.permit();
         }
 
         ArmorWeight weight = armorWeight(stack);
 
         if (playerClass.maxArmor().allows(weight)) {
-            return RestrictionResult.allowed();
+            return RestrictionResult.permit();
         }
 
         return RestrictionResult.denied(
@@ -263,7 +263,7 @@ public final class ClassRestrictionEngine {
         boolean allowed,
         String reason
     ) {
-        public static RestrictionResult allowed() {
+        public static RestrictionResult permit() {
             return new RestrictionResult(true, "");
         }
 

@@ -20,3 +20,5 @@ shields, and armour weight. Custom item tags make mod compatibility data-driven.
 
 CyberClasses is intentionally its own mod. CyberRaces owns races, CyberClasses
 owns player classes, and CyberNpc owns NPC AI/classes.
+
+Initial development version: `0.1.0-alpha.1`.

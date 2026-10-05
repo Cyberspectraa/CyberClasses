@@ -1,7 +1,7 @@
 package com.cyberspectraa.cyberclasses.network.packet;
 
 import com.cyberspectraa.cyberclasses.classdata.ClassCreationManager;
-import com.cyberspectraa.cyberclasses.classdata.PlayerClass;
+import com.cyberspectraa.cyberclasses.classdata.CyberClass;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent;
@@ -32,7 +32,7 @@ public record SubmitClassPacket(String classId) {
         ServerPlayer player = context.getSender();
 
         if (player != null) {
-            PlayerClass.byId(packet.classId())
+            CyberClass.playerById(packet.classId())
                 .ifPresent(playerClass ->
                     ClassCreationManager.complete(
                         player,

@@ -51,7 +51,7 @@ public final class ClassCreationManager {
 
     public static void complete(
         ServerPlayer player,
-        PlayerClass playerClass
+        CyberClass playerClass
     ) {
         if (playerClass == null || ClassManager.hasClass(player)) {
             return;
@@ -68,7 +68,7 @@ public final class ClassCreationManager {
 
     public static void forceSet(
         ServerPlayer player,
-        PlayerClass playerClass
+        CyberClass playerClass
     ) {
         ClassManager.setClass(player, playerClass);
         OPEN_SENT.remove(player.getUUID());

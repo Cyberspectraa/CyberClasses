@@ -2,7 +2,7 @@ package com.cyberspectraa.cyberclasses.command;
 
 import com.cyberspectraa.cyberclasses.classdata.ClassCreationManager;
 import com.cyberspectraa.cyberclasses.classdata.ClassManager;
-import com.cyberspectraa.cyberclasses.classdata.PlayerClass;
+import com.cyberspectraa.cyberclasses.classdata.CyberClass;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -46,8 +46,8 @@ public final class CyberClassCommands {
                                         .suggests((context, builder) ->
                                             SharedSuggestionProvider.suggest(
                                                 Arrays.stream(
-                                                    PlayerClass.values()
-                                                ).map(PlayerClass::id),
+                                                    CyberClass.playerChoices()
+                                                ).map(CyberClass::id),
                                                 builder
                                             )
                                         )
@@ -109,8 +109,8 @@ public final class CyberClassCommands {
         ServerPlayer player,
         String id
     ) {
-        PlayerClass playerClass =
-            PlayerClass.byId(id).orElse(null);
+        CyberClass playerClass =
+            CyberClass.playerById(id).orElse(null);
 
         if (playerClass == null) {
             player.sendSystemMessage(

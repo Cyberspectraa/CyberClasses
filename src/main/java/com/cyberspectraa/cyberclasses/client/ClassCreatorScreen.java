@@ -1,6 +1,6 @@
 package com.cyberspectraa.cyberclasses.client;
 
-import com.cyberspectraa.cyberclasses.classdata.PlayerClass;
+import com.cyberspectraa.cyberclasses.classdata.CyberClass;
 import com.cyberspectraa.cyberclasses.network.CyberClassesNetwork;
 import com.cyberspectraa.cyberclasses.network.packet.SubmitClassPacket;
 import net.minecraft.client.gui.GuiGraphics;
@@ -12,6 +12,9 @@ import net.minecraft.util.FormattedCharSequence;
 import java.util.List;
 
 public final class ClassCreatorScreen extends Screen {
+    private static final CyberClass[] PLAYER_CLASSES =
+        CyberClass.playerChoices();
+
     private int classIndex;
     private Button classButton;
 
@@ -72,7 +75,7 @@ public final class ClassCreatorScreen extends Screen {
 
         int centerX = width / 2;
         int top = Math.max(24, height / 2 - 105);
-        PlayerClass playerClass = currentClass();
+        CyberClass playerClass = currentClass();
 
         graphics.drawCenteredString(
             font,
@@ -166,7 +169,7 @@ public final class ClassCreatorScreen extends Screen {
     private void changeClass(int direction) {
         classIndex = Math.floorMod(
             classIndex + direction,
-            PlayerClass.values().length
+            PLAYER_CLASSES.length
         );
 
         if (classButton != null) {
@@ -178,8 +181,8 @@ public final class ClassCreatorScreen extends Screen {
         }
     }
 
-    private PlayerClass currentClass() {
-        return PlayerClass.values()[classIndex];
+    private CyberClass currentClass() {
+        return PLAYER_CLASSES[classIndex];
     }
 
     private void submit() {
@@ -191,7 +194,7 @@ public final class ClassCreatorScreen extends Screen {
     }
 
     private static String allowedWeapons(
-        PlayerClass playerClass
+        CyberClass playerClass
     ) {
         StringBuilder builder = new StringBuilder();
 

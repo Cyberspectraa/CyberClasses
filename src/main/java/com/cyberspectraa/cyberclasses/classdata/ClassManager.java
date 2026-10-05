@@ -13,7 +13,7 @@ public final class ClassManager {
     private ClassManager() {
     }
 
-    public static Optional<PlayerClass> getClass(ServerPlayer player) {
+    public static Optional<CyberClass> getClass(ServerPlayer player) {
         if (player == null) {
             return Optional.empty();
         }
@@ -26,7 +26,7 @@ public final class ClassManager {
             return Optional.empty();
         }
 
-        return PlayerClass.byId(root.getString(CLASS_KEY));
+        return CyberClass.byId(root.getString(CLASS_KEY));
     }
 
     public static boolean hasClass(ServerPlayer player) {
@@ -35,8 +35,14 @@ public final class ClassManager {
 
     public static void setClass(
         ServerPlayer player,
-        PlayerClass playerClass
+        CyberClass playerClass
     ) {
+        if (player == null
+                || playerClass == null
+                || !playerClass.playerSelectable()) {
+            return;
+        }
+
         CompoundTag persistent = player.getPersistentData();
         CompoundTag root = persistent.contains(ROOT_KEY)
             ? persistent.getCompound(ROOT_KEY)

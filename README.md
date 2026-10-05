@@ -19,6 +19,12 @@ The restriction system currently controls sword/axe use, ranged weapons, magic,
 shields, and armour weight. Custom item tags make mod compatibility data-driven.
 
 CyberClasses is intentionally its own mod. CyberRaces owns races, CyberClasses
-owns player classes, and CyberNpc owns NPC AI/classes.
+owns the shared class definitions for both players and Wild NPCs, and CyberNpc
+owns the AI/loadout behaviour used by NPCs after CyberClasses assigns their class.
 
-Initial development version: `0.1.0-alpha.1`.
+Wild NPC class spawn rarity, class IDs, magic requirements and legacy class
+migration now live in CyberClasses so adding or changing a class only needs one
+shared definition. Classless remains NPC-only and is never shown in the player
+class selector.
+
+Current development version: `0.1.1-alpha.2`.

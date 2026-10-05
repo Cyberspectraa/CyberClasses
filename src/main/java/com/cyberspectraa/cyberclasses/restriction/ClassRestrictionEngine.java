@@ -3,7 +3,7 @@ package com.cyberspectraa.cyberclasses.restriction;
 import com.cyberspectraa.cyberclasses.CyberClasses;
 import com.cyberspectraa.cyberclasses.classdata.ArmorWeight;
 import com.cyberspectraa.cyberclasses.classdata.ClassManager;
-import com.cyberspectraa.cyberclasses.classdata.PlayerClass;
+import com.cyberspectraa.cyberclasses.classdata.CyberClass;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -53,7 +53,7 @@ public final class ClassRestrictionEngine {
             return RestrictionResult.permit();
         }
 
-        PlayerClass playerClass =
+        CyberClass playerClass =
             ClassManager.getClass(player).orElse(null);
 
         if (playerClass == null) {
@@ -94,7 +94,7 @@ public final class ClassRestrictionEngine {
             return RestrictionResult.permit();
         }
 
-        PlayerClass playerClass =
+        CyberClass playerClass =
             ClassManager.getClass(player).orElse(null);
 
         if (playerClass == null) {
@@ -117,7 +117,7 @@ public final class ClassRestrictionEngine {
         net.minecraft.server.level.ServerPlayer player
     ) {
         return ClassManager.getClass(player)
-            .map(PlayerClass::allowsMagic)
+            .map(CyberClass::allowsMagic)
             .orElse(true);
     }
 

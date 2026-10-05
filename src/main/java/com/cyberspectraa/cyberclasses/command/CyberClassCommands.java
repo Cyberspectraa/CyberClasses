@@ -1,8 +1,11 @@
 package com.cyberspectraa.cyberclasses.command;
 
+import com.cyberspectraa.cyberclasses.classdata.ClassAdvancement;
+import com.cyberspectraa.cyberclasses.classdata.ClassAdvancementManager;
 import com.cyberspectraa.cyberclasses.classdata.ClassCreationManager;
 import com.cyberspectraa.cyberclasses.classdata.ClassManager;
 import com.cyberspectraa.cyberclasses.classdata.CyberClass;
+import com.cyberspectraa.cyberclasses.classdata.CyberProgressionBridge;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -27,12 +30,26 @@ public final class CyberClassCommands {
                 .then(
                     Commands.literal("info")
                         .executes(context ->
-                            info(context.getSource().getPlayerOrException())
+                            info(
+                                context.getSource()
+                                    .getPlayerOrException()
+                            )
+                        )
+                )
+                .then(
+                    Commands.literal("advance")
+                        .executes(context ->
+                            openAdvancement(
+                                context.getSource()
+                                    .getPlayerOrException()
+                            )
                         )
                 )
                 .then(
                     Commands.literal("set")
-                        .requires(source -> source.hasPermission(2))
+                        .requires(source ->
+                            source.hasPermission(2)
+                        )
                         .then(
                             Commands.argument(
                                     "player",
@@ -67,8 +84,68 @@ public final class CyberClassCommands {
                         )
                 )
                 .then(
+                    Commands.literal("setadvancement")
+                        .requires(source ->
+                            source.hasPermission(2)
+                        )
+                        .then(
+                            Commands.argument(
+                                    "player",
+                                    EntityArgument.player()
+                                )
+                                .then(
+                                    Commands.argument(
+                                            "advancement",
+                                            StringArgumentType.word()
+                                        )
+                                        .suggests((context, builder) ->
+                                            SharedSuggestionProvider.suggest(
+                                                Arrays.stream(
+                                                    ClassAdvancement.values()
+                                                ).map(ClassAdvancement::id),
+                                                builder
+                                            )
+                                        )
+                                        .executes(context ->
+                                            setAdvancement(
+                                                EntityArgument.getPlayer(
+                                                    context,
+                                                    "player"
+                                                ),
+                                                StringArgumentType.getString(
+                                                    context,
+                                                    "advancement"
+                                                )
+                                            )
+                                        )
+                                )
+                        )
+                )
+                .then(
+                    Commands.literal("clearadvancement")
+                        .requires(source ->
+                            source.hasPermission(2)
+                        )
+                        .then(
+                            Commands.argument(
+                                    "player",
+                                    EntityArgument.player()
+                                )
+                                .executes(context ->
+                                    clearAdvancement(
+                                        EntityArgument.getPlayer(
+                                            context,
+                                            "player"
+                                        )
+                                    )
+                                )
+                        )
+                )
+                .then(
                     Commands.literal("reset")
-                        .requires(source -> source.hasPermission(2))
+                        .requires(source ->
+                            source.hasPermission(2)
+                        )
                         .then(
                             Commands.argument(
                                     "player",
@@ -88,20 +165,86 @@ public final class CyberClassCommands {
     }
 
     private static int info(ServerPlayer player) {
-        String value = ClassManager.getClass(player)
-            .map(playerClass ->
-                playerClass.displayName()
-                    + " — "
-                    + playerClass.description()
-            )
-            .orElse("No class selected");
+        CyberClass baseClass =
+            ClassManager.getClass(player).orElse(null);
+
+        if (baseClass == null) {
+            player.sendSystemMessage(
+                Component.literal(
+                    "CyberClass: No class selected"
+                )
+            );
+            return 0;
+        }
+
+        var advancement =
+            ClassManager.getAdvancement(player);
+        var rules =
+            ClassManager.getEffectiveRules(player);
 
         player.sendSystemMessage(
             Component.literal(
-                "CyberClass: " + value
+                "CyberClass: "
+                    + baseClass.displayName()
+                    + advancement
+                        .map(value ->
+                            " -> "
+                                + value.displayName()
+                        )
+                        .orElse("")
             )
         );
 
+        player.sendSystemMessage(
+            Component.literal(
+                "Cyber Level: "
+                    + CyberProgressionBridge.getLevel(player)
+                    + " | Mana: "
+                    + rules.manaTier().displayName()
+                    + " | Armour: "
+                    + rules.maxArmor().displayName()
+            )
+        );
+
+        if (ClassManager.isAdvancementEligible(player)) {
+            player.sendSystemMessage(
+                Component.literal(
+                    "Class advancement available. Use /cyberclasses advance."
+                )
+            );
+        }
+
+        return 1;
+    }
+
+    private static int openAdvancement(
+        ServerPlayer player
+    ) {
+        if (ClassManager.hasAdvancement(player)) {
+            player.sendSystemMessage(
+                Component.literal(
+                    "You have already chosen "
+                        + ClassManager.getAdvancement(player)
+                            .map(ClassAdvancement::displayName)
+                            .orElse("an advancement")
+                        + "."
+                )
+            );
+            return 0;
+        }
+
+        if (!ClassManager.isAdvancementEligible(player)) {
+            player.sendSystemMessage(
+                Component.literal(
+                    "Class advancement unlocks at Cyber Level "
+                        + ClassAdvancement.REQUIRED_LEVEL
+                        + "."
+                )
+            );
+            return 0;
+        }
+
+        ClassAdvancementManager.openSelection(player);
         return 1;
     }
 
@@ -130,6 +273,67 @@ public final class CyberClassCommands {
             Component.literal(
                 "Class set to "
                     + playerClass.displayName()
+            )
+        );
+
+        return 1;
+    }
+
+    private static int setAdvancement(
+        ServerPlayer player,
+        String id
+    ) {
+        ClassAdvancement advancement =
+            ClassAdvancement.byId(id).orElse(null);
+
+        if (advancement == null) {
+            player.sendSystemMessage(
+                Component.literal(
+                    "Unknown class advancement: " + id
+                )
+            );
+            return 0;
+        }
+
+        CyberClass baseClass =
+            ClassManager.getClass(player).orElse(null);
+
+        if (baseClass != advancement.baseClass()) {
+            player.sendSystemMessage(
+                Component.literal(
+                    advancement.displayName()
+                        + " requires base class "
+                        + advancement.baseClass()
+                            .displayName()
+                        + "."
+                )
+            );
+            return 0;
+        }
+
+        ClassAdvancementManager.forceSet(
+            player,
+            advancement
+        );
+
+        player.sendSystemMessage(
+            Component.literal(
+                "Class advancement set to "
+                    + advancement.displayName()
+            )
+        );
+
+        return 1;
+    }
+
+    private static int clearAdvancement(
+        ServerPlayer player
+    ) {
+        ClassManager.clearAdvancement(player);
+
+        player.sendSystemMessage(
+            Component.literal(
+                "Class advancement cleared."
             )
         );
 

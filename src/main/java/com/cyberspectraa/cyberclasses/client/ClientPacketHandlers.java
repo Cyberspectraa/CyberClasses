@@ -24,4 +24,26 @@ public final class ClientPacketHandlers {
             minecraft.setScreen(null);
         }
     }
+
+    public static void openClassAdvancement(
+        String baseClassId
+    ) {
+        Minecraft minecraft = Minecraft.getInstance();
+
+        if (!(minecraft.screen
+                instanceof ClassAdvancementScreen)) {
+            minecraft.setScreen(
+                new ClassAdvancementScreen(baseClassId)
+            );
+        }
+    }
+
+    public static void closeClassAdvancement() {
+        Minecraft minecraft = Minecraft.getInstance();
+
+        if (minecraft.screen
+                instanceof ClassAdvancementScreen) {
+            minecraft.setScreen(null);
+        }
+    }
 }

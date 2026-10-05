@@ -28,3 +28,18 @@ shared definition. Classless remains NPC-only and is never shown in the player
 class selector.
 
 Current development version: `0.1.1-alpha.2`.
+
+
+## Progression
+
+CyberClasses now defines twelve player base classes and their Level 20 class
+advancement trees. Player restrictions, armour limits and Iron's Spells mana
+are resolved from the player's effective class path. Wild NPCs consume the
+same definitions through the reflection-friendly NpcClassRegistry.
+
+Base classes:
+Knight, Berserker, Archer, Ranger, Rogue, Monk, Mage, Cleric, Spellblade,
+Druid, Bard and Alchemist.
+
+The first class advancement unlocks at Cyber Level 20. Advancements may alter
+weapon permissions, armour limits, magic access and mana tier.

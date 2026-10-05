@@ -3,7 +3,7 @@ package com.cyberspectraa.cyberclasses.restriction;
 import com.cyberspectraa.cyberclasses.CyberClasses;
 import com.cyberspectraa.cyberclasses.classdata.ArmorWeight;
 import com.cyberspectraa.cyberclasses.classdata.ClassManager;
-import com.cyberspectraa.cyberclasses.classdata.CyberClass;
+import com.cyberspectraa.cyberclasses.classdata.ClassRules;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -53,33 +53,56 @@ public final class ClassRestrictionEngine {
             return RestrictionResult.permit();
         }
 
-        CyberClass playerClass =
-            ClassManager.getClass(player).orElse(null);
+        ClassRules rules =
+            ClassManager.getEffectiveRules(player);
 
-        if (playerClass == null) {
+        WeaponType type = weaponType(stack);
+
+        return switch (type) {
+            case SWORD -> rules.allowsSwords()
+                ? RestrictionResult.permit()
+                : RestrictionResult.denied("swords in combat");
+            case AXE -> rules.allowsAxes()
+                ? RestrictionResult.permit()
+                : RestrictionResult.denied("axes in combat");
+            case RANGED -> rules.allowsRanged()
+                ? RestrictionResult.permit()
+                : RestrictionResult.denied("ranged weapons");
+            case MAGIC -> rules.allowsMagic()
+                ? RestrictionResult.permit()
+                : RestrictionResult.denied("magic");
+            case SHIELD -> rules.allowsShields()
+                ? RestrictionResult.permit()
+                : RestrictionResult.denied("shields");
+            case OTHER -> RestrictionResult.permit();
+        };
+    }
+
+    public static RestrictionResult canUseOnBlock(
+        net.minecraft.server.level.ServerPlayer player,
+        ItemStack stack
+    ) {
+        if (stack == null || stack.isEmpty()) {
+            return RestrictionResult.permit();
+        }
+
+        // Tool restrictions are combat restrictions, not survival
+        // restrictions. Axes remain usable for logs/stripping regardless of
+        // class, and ordinary swords/tools never block block interaction.
+        if (stack.getItem() instanceof AxeItem
+                || stack.getItem() instanceof SwordItem) {
             return RestrictionResult.permit();
         }
 
         WeaponType type = weaponType(stack);
 
-        return switch (type) {
-            case SWORD -> playerClass.allowsSwords()
-                ? RestrictionResult.permit()
-                : RestrictionResult.denied("swords");
-            case AXE -> playerClass.allowsAxes()
-                ? RestrictionResult.permit()
-                : RestrictionResult.denied("axes");
-            case RANGED -> playerClass.allowsRanged()
-                ? RestrictionResult.permit()
-                : RestrictionResult.denied("ranged weapons");
-            case MAGIC -> playerClass.allowsMagic()
-                ? RestrictionResult.permit()
-                : RestrictionResult.denied("magic");
-            case SHIELD -> playerClass.allowsShields()
-                ? RestrictionResult.permit()
-                : RestrictionResult.denied("shields");
-            case OTHER -> RestrictionResult.permit();
-        };
+        if (type == WeaponType.MAGIC
+                || type == WeaponType.RANGED
+                || type == WeaponType.SHIELD) {
+            return canUse(player, stack);
+        }
+
+        return RestrictionResult.permit();
     }
 
     public static RestrictionResult canWear(
@@ -94,16 +117,12 @@ public final class ClassRestrictionEngine {
             return RestrictionResult.permit();
         }
 
-        CyberClass playerClass =
-            ClassManager.getClass(player).orElse(null);
-
-        if (playerClass == null) {
-            return RestrictionResult.permit();
-        }
+        ClassRules rules =
+            ClassManager.getEffectiveRules(player);
 
         ArmorWeight weight = armorWeight(stack);
 
-        if (playerClass.maxArmor().allows(weight)) {
+        if (rules.maxArmor().allows(weight)) {
             return RestrictionResult.permit();
         }
 
@@ -116,9 +135,10 @@ public final class ClassRestrictionEngine {
     public static boolean mayCastMagic(
         net.minecraft.server.level.ServerPlayer player
     ) {
-        return ClassManager.getClass(player)
-            .map(CyberClass::allowsMagic)
-            .orElse(true);
+        return player == null
+            || !ClassManager.hasClass(player)
+            || ClassManager.getEffectiveRules(player)
+                .allowsMagic();
     }
 
     public static ArmorWeight armorWeight(ItemStack stack) {

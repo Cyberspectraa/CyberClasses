@@ -1,5 +1,6 @@
 package com.cyberspectraa.cyberclasses.event;
 
+import com.cyberspectraa.cyberclasses.classdata.ClassAdvancementManager;
 import com.cyberspectraa.cyberclasses.classdata.ClassCreationManager;
 import com.cyberspectraa.cyberclasses.classdata.ClassManager;
 import net.minecraft.server.level.ServerPlayer;
@@ -17,6 +18,10 @@ public final class ClassSelectionEvents {
     ) {
         if (event.getEntity() instanceof ServerPlayer player) {
             ClassCreationManager.handleLogin(player);
+
+            if (ClassManager.hasClass(player)) {
+                ClassAdvancementManager.handleLogin(player);
+            }
         }
     }
 
@@ -24,9 +29,15 @@ public final class ClassSelectionEvents {
     public static void onPlayerTick(
         TickEvent.PlayerTickEvent event
     ) {
-        if (event.phase == TickEvent.Phase.END
-                && event.player instanceof ServerPlayer player) {
-            ClassCreationManager.tick(player);
+        if (event.phase != TickEvent.Phase.END
+                || !(event.player instanceof ServerPlayer player)) {
+            return;
+        }
+
+        ClassCreationManager.tick(player);
+
+        if (ClassManager.hasClass(player)) {
+            ClassAdvancementManager.tick(player);
         }
     }
 
@@ -47,6 +58,7 @@ public final class ClassSelectionEvents {
     ) {
         if (event.getEntity() instanceof ServerPlayer player) {
             ClassCreationManager.onLogout(player);
+            ClassAdvancementManager.onLogout(player);
         }
     }
 }

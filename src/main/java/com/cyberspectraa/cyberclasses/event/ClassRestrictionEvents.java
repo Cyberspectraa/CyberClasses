@@ -1,6 +1,7 @@
 package com.cyberspectraa.cyberclasses.event;
 
 import com.cyberspectraa.cyberclasses.classdata.ClassManager;
+import com.cyberspectraa.cyberclasses.compat.IronSpellsManaController;
 import com.cyberspectraa.cyberclasses.restriction.ClassRestrictionEngine;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -47,7 +48,8 @@ public final class ClassRestrictionEvents {
     public static void onRightClickItem(
         PlayerInteractEvent.RightClickItem event
     ) {
-        if (!(event.getEntity() instanceof ServerPlayer player)) {
+        if (!(event.getEntity() instanceof ServerPlayer player)
+                || !ClassManager.hasClass(player)) {
             return;
         }
 
@@ -58,7 +60,9 @@ public final class ClassRestrictionEvents {
 
         if (!result.allowed()) {
             event.setCanceled(true);
-            event.setCancellationResult(InteractionResult.FAIL);
+            event.setCancellationResult(
+                InteractionResult.FAIL
+            );
             deny(player, result.reason());
         }
     }
@@ -67,18 +71,22 @@ public final class ClassRestrictionEvents {
     public static void onRightClickBlock(
         PlayerInteractEvent.RightClickBlock event
     ) {
-        if (!(event.getEntity() instanceof ServerPlayer player)) {
+        if (!(event.getEntity() instanceof ServerPlayer player)
+                || !ClassManager.hasClass(player)) {
             return;
         }
 
-        var result = ClassRestrictionEngine.canUse(
-            player,
-            event.getItemStack()
-        );
+        var result =
+            ClassRestrictionEngine.canUseOnBlock(
+                player,
+                event.getItemStack()
+            );
 
         if (!result.allowed()) {
             event.setCanceled(true);
-            event.setCancellationResult(InteractionResult.FAIL);
+            event.setCancellationResult(
+                InteractionResult.FAIL
+            );
             deny(player, result.reason());
         }
     }
@@ -87,10 +95,13 @@ public final class ClassRestrictionEvents {
     public static void onEntityInteract(
         PlayerInteractEvent.EntityInteract event
     ) {
-        if (!(event.getEntity() instanceof ServerPlayer player)) {
+        if (!(event.getEntity() instanceof ServerPlayer player)
+                || !ClassManager.hasClass(player)) {
             return;
         }
 
+        // Entity interaction is utility behaviour unless the item itself has
+        // a real use action. Combat attacks are handled separately above.
         var result = ClassRestrictionEngine.canUse(
             player,
             event.getItemStack()
@@ -98,14 +109,17 @@ public final class ClassRestrictionEvents {
 
         if (!result.allowed()) {
             event.setCanceled(true);
-            event.setCancellationResult(InteractionResult.FAIL);
+            event.setCancellationResult(
+                InteractionResult.FAIL
+            );
             deny(player, result.reason());
         }
     }
 
     @SubscribeEvent
     public static void onArrowLoose(ArrowLooseEvent event) {
-        if (!(event.getEntity() instanceof ServerPlayer player)) {
+        if (!(event.getEntity() instanceof ServerPlayer player)
+                || !ClassManager.hasClass(player)) {
             return;
         }
 
@@ -126,12 +140,17 @@ public final class ClassRestrictionEvents {
     ) {
         if (event.phase != TickEvent.Phase.END
                 || !(event.player instanceof ServerPlayer player)
-                || !ClassManager.hasClass(player)
-                || player.tickCount % 5 != 0) {
+                || !ClassManager.hasClass(player)) {
             return;
         }
 
-        enforceArmor(player);
+        if (player.tickCount % 5 == 0) {
+            enforceArmor(player);
+        }
+
+        if (player.tickCount % 20 == 0) {
+            IronSpellsManaController.apply(player);
+        }
     }
 
     private static void enforceArmor(ServerPlayer player) {
@@ -161,7 +180,10 @@ public final class ClassRestrictionEvents {
             }
 
             ItemStack removed = stack.copy();
-            player.setItemSlot(slot, ItemStack.EMPTY);
+            player.setItemSlot(
+                slot,
+                ItemStack.EMPTY
+            );
 
             if (!player.getInventory().add(removed)) {
                 player.drop(removed, false);
@@ -190,13 +212,12 @@ public final class ClassRestrictionEvents {
             now + 30L
         );
 
-        String className = ClassManager.getClass(player)
-            .map(value -> value.displayName())
-            .orElse("Current class");
-
         player.displayClientMessage(
             Component.literal(
-                className + " cannot use " + reason + "."
+                ClassManager.getEffectiveDisplayName(player)
+                    + " cannot use "
+                    + reason
+                    + "."
             ).withStyle(ChatFormatting.RED),
             true
         );

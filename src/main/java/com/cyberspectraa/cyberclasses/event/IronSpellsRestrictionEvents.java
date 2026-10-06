@@ -2,6 +2,7 @@ package com.cyberspectraa.cyberclasses.event;
 
 import com.cyberspectraa.cyberclasses.restriction.ClassRestrictionEngine;
 import io.redspace.ironsspellbooks.api.events.SpellPreCastEvent;
+import io.redspace.ironsspellbooks.api.spells.CastSource;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
@@ -14,6 +15,7 @@ public final class IronSpellsRestrictionEvents {
     public static void onSpellPreCast(SpellPreCastEvent event) {
         if (!ModList.get().isLoaded("irons_spellbooks")
                 || !(event.getEntity() instanceof ServerPlayer player)
+                || event.getCastSource() == CastSource.NONE
                 || ClassRestrictionEngine.mayCastMagic(player)) {
             return;
         }

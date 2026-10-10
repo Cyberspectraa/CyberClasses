@@ -5,6 +5,8 @@ import com.cyberspectraa.cyberclasses.network.packet.CloseClassCreatorPacket;
 import com.cyberspectraa.cyberclasses.network.packet.OpenClassCreatorPacket;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.fml.ModList;
+import java.lang.reflect.Method;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -59,11 +61,14 @@ public final class ClassCreationManager {
 
         ClassManager.setClass(player, playerClass);
         OPEN_SENT.remove(player.getUUID());
-        CreationHoldManager.release(player);
         CyberClassesNetwork.sendToPlayer(
             player,
             new CloseClassCreatorPacket()
         );
+        // Summoning begins only after BOTH race and class are confirmed.
+        // Avoid exposing the player between the creator closing and respawn.
+        if (summoningHandoff(player)) CreationHoldManager.forget(player);
+        else CreationHoldManager.release(player);
     }
 
     public static void forceSet(
@@ -110,6 +115,17 @@ public final class ClassCreationManager {
 
         return !root.contains(RACE_CREATED_KEY)
             || root.getBoolean(RACE_CREATED_KEY);
+    }
+
+    private static boolean summoningHandoff(ServerPlayer player) {
+        if (!ModList.get().isLoaded("cybernpc")) return false;
+        try {
+            Class<?> intro = Class.forName("com.cyberspectraa.cybernpc.intro.CyberIntroService");
+            Method method = intro.getMethod("beginSummoning", ServerPlayer.class);
+            return Boolean.TRUE.equals(method.invoke(null, player));
+        } catch (ReflectiveOperationException | RuntimeException ignored) {
+            return false;
+        }
     }
 
     private static void beginSelection(ServerPlayer player) {

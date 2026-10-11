@@ -39,7 +39,23 @@ minecraft {
     }
 }
 
+// Photon files are exported at build time, never requiring Photon or LDLib
+// to load CyberClasses when the optional visual mod is absent.
+sourceSets {
+    fxgen {
+        java.srcDir 'fxgen/src/main/java'
+        resources.srcDirs = []
+        compileClasspath += sourceSets.main.compileClasspath
+        runtimeClasspath += sourceSets.main.runtimeClasspath
+    }
+}
+
 repositories {
+    maven {
+        name = 'LowDragLibSnapshots'
+        url = 'https://maven.firstdarkdev.xyz/snapshots'
+        content { includeGroup 'com.lowdragmc.ldlib' }
+    }
     maven {
         name = 'CurseMaven'
         url = 'https://www.cursemaven.com'
@@ -56,9 +72,24 @@ dependencies {
     // Iron's Spells, but when it is present SpellPreCastEvent is used to make
     // magic restrictions impossible to bypass through the spell wheel.
     compileOnly fg.deobf("curse.maven:irons-spells-n-spellbooks-855414:8364933")
+
+    // Dedicated Photon .fx export, used ONLY by fxgen at build time.
+    fxgenImplementation fg.deobf("curse.maven:photon-871522:7501597@jar")
+    fxgenImplementation fg.deobf("com.lowdragmc.ldlib:ldlib-forge-1.20.1:1.0.42@jar")
+}
+
+tasks.register('generateClassTransformationFx', JavaExec) {
+    dependsOn tasks.named('fxgenClasses')
+    classpath = sourceSets.fxgen.runtimeClasspath
+    mainClass = 'com.cyberspectraa.cyberclasses.fxgen.ClassTransformationFxGenerator'
+    args layout.buildDirectory.file('generated-class-fx/assets/cyberclasses/fx/class_transformation.fx')
+            .get().asFile.absolutePath
 }
 
 tasks.named('processResources', ProcessResources).configure {
+    dependsOn tasks.named('generateClassTransformationFx')
+    from(layout.buildDirectory.dir('generated-class-fx'))
+
     var replaceProperties = [
         minecraft_version: minecraft_version,
         minecraft_version_range: minecraft_version_range,

@@ -5,5 +5,6 @@
   "item.cyberclasses.common_class_book": "Common Class Book",
   "item.cyberclasses.uncommon_class_book": "Uncommon Class Book",
   "item.cyberclasses.rare_class_book": "Rare Class Book",
-  "item.cyberclasses.legendary_class_book": "Legendary Class Book"
+  "item.cyberclasses.legendary_class_book": "Legendary Class Book",
+  "itemGroup.cyberclasses": "CyberClasses"
 }

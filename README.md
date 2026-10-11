@@ -1,45 +1,98 @@
 # CyberClasses
 
-Forge 1.20.1 player class framework for the CyberSpectra Season 2 modpack.
+**Current version: 0.2.1-alpha.7** · Minecraft **1.20.1** · Forge **47.4.10** · Java **17**
 
-CyberClasses runs after CyberRaces character creation. Once a player has chosen
-a race, CyberClasses opens its own mandatory class selector.
+CyberClasses defines the shared player and Wild NPC class system for CyberSpectra Season 2: class selection, gear and magic restrictions, mana tiers, advancement paths and class-related quest unlocks.
 
-Initial classes:
-- Knight
-- Archer
-- Rogue
-- Mage
-- Berserker
-- Cleric
-- Spellblade
-- Ranger
+**Design ownership:** CyberRaces owns race and Cyber Level progression; CyberClasses owns class definitions and rules; CyberNpc owns NPC equipment, combat, loadouts and decision-making. CyberQuest can grant symbolic class unlocks without depending on class-specific implementation details.
 
-The restriction system currently controls sword/axe use, ranged weapons, magic,
-shields, and armour weight. Custom item tags make mod compatibility data-driven.
+## Character creation
 
-CyberClasses is intentionally its own mod. CyberRaces owns races, CyberClasses
-owns the shared class definitions for both players and Wild NPCs, and CyberNpc
-owns the AI/loadout behaviour used by NPCs after CyberClasses assigns their class.
+With the full ecosystem installed, a player selects a **race in CyberRaces**, then chooses a **class in CyberClasses** before the first-arrival cinematic. The creation flow holds newly arriving players safely until the required selections are complete; existing saved characters are handled through the migration/creation-state checks.
 
-Wild NPC class spawn rarity, class IDs, magic requirements and legacy class
-migration now live in CyberClasses so adding or changing a class only needs one
-shared definition. Classless remains NPC-only and is never shown in the player
-class selector.
+There are **12 player-selectable base classes**:
 
-Current development version: `0.1.1-alpha.2`.
+| Class | Intended style | Base equipment/magic identity |
+| --- | --- | --- |
+| Knight | Frontline defender | Heavy armour, melee weapons, shields |
+| Berserker | Aggressive melee | Heavy armour and melee weapons |
+| Archer | Long-range combat | Ranged weapons, medium armour |
+| Ranger | Wilderness fighter | Mixed melee/ranged, medium armour |
+| Rogue | Mobile skirmisher | Blades, light armour |
+| Monk | Unarmed fighter | Light armour, no standard weapon focus |
+| Mage | Pure spellcaster | Light armour, very high mana |
+| Cleric | Divine support | Axes, shields, medium armour, magic |
+| Spellblade | Melee/caster hybrid | Swords, medium armour, lower mana |
+| Druid | Nature spellcaster | Medium armour, high mana |
+| Bard | Group support caster | Light armour, magic and blades |
+| Alchemist | Potion/utility specialist | Light armour, no mana requirement |
 
+**Classless** is an additional **NPC-only** class. It is the most common Wild NPC class and is deliberately not offered in the player creator. NPC class spawn weights and spell-mod requirements are defined in `CyberClass`, not duplicated in CyberNpc.
 
-## Progression
+## Rules and restrictions
 
-CyberClasses now defines twelve player base classes and their Level 20 class
-advancement trees. Player restrictions, armour limits and Iron's Spells mana
-are resolved from the player's effective class path. Wild NPCs consume the
-same definitions through the reflection-friendly NpcClassRegistry.
+The server-side restriction engine enforces effective class/advancement rules for:
 
-Base classes:
-Knight, Berserker, Archer, Ranger, Rogue, Monk, Mage, Cleric, Spellblade,
-Druid, Bard and Alchemist.
+- Swords, axes, bows/crossbows and other tagged ranged weapons.
+- Shields and magic-capable items.
+- Light, medium and heavy armour limits.
+- Magic casting and class-specific mana pool tiers, including the optional Iron's Spells 'n Spellbooks bridge.
 
-The first class advancement unlocks at Cyber Level 20. Advancements may alter
-weapon permissions, armour limits, magic access and mana tier.
+Item tags allow additional weapon and armour types from other mods to be categorised without rewriting class logic. Default classification also handles supported vanilla items. Restrictions are evaluated from the player's **effective class path**, including any selected advancement; not all classes may use the same equipment or spell access.
+
+## Class advancement — Cyber Level 20
+
+At **Cyber Level 20**, a player can choose one of **three paths for their base class**, for **36 defined advancements**:
+
+| Base class | Advancement choices |
+| --- | --- |
+| Knight | Vanguard, Templar, Guardian |
+| Berserker | Reaver, Juggernaut, Bloodrager |
+| Archer | Marksman, Sharpshooter, Arcane Archer |
+| Ranger | Hunter, Pathfinder, Warden |
+| Rogue | Assassin, Duelist, Shadow |
+| Monk | Iron Fist, Windwalker, Ascetic |
+| Mage | Sorcerer, Elementalist, Necromancer |
+| Cleric | Paladin, Oracle, Inquisitor |
+| Spellblade | Battlemage, Rune Knight, Arcane Duelist |
+| Druid | Shaman, Wildspeaker, Stormcaller |
+| Bard | Skald, Minstrel, Mesmer |
+| Alchemist | Apothecary, Bombardier, Transmuter |
+
+A dedicated advancement screen and server-side state store the choice. Advancements **currently define equipment permissions, armour limits, magic access and mana tiers** for the effective class path. Their flavour descriptions (for example, necromancy, assassination or potion mastery) are **not a guarantee that bespoke active mechanics for every path already exist**.
+
+Class and advancement definitions are also exposed to Wild CyberNpc entities via the lightweight `NpcClassRegistry` bridge.
+
+## Quest unlocks
+
+`ClassQuestUnlockManager` saves class-scoped, symbolic unlock IDs awarded by compatible CyberQuest rewards. The unlock storage and lookup APIs exist now; further class-specific gameplay can consume these flags without changing the underlying quest framework. An unlock ID is **not automatically a fully implemented new ability**.
+
+## Commands
+
+Player commands:
+
+```mcfunction
+/cyberclasses info
+/cyberclasses advance
+```
+
+Admin commands (permission level 2):
+
+```mcfunction
+/cyberclasses set <player> <class>
+/cyberclasses setadvancement <player> <advancement>
+/cyberclasses clearadvancement <player>
+/cyberclasses reset <player>
+```
+
+`/cyberclasses advance` opens advancement selection subject to its eligibility checks; admin setters are testing/maintenance tools, not substitutes for the normal progression flow.
+
+## Integrations and status
+
+- **CyberRaces:** race setup and Cyber Level thresholds.
+- **CyberNpc:** shared Wild NPC class rolls, advancements, equipment and combat AI; NPC-only Classless support.
+- **CyberQuest:** quest requirements/rewards involving class or advancement, and class-specific symbolic unlocks.
+- **Iron's Spells 'n Spellbooks:** mana tiers and player spellcasting restrictions when available; spellcasting NPC classes are conditionally generated where applicable.
+- **CyberServer:** world-owned policy can gate natural Wild NPC class advancement.
+
+This is an **alpha gameplay framework**. Class rules, selection and advancement definitions exist, but unique signature skill sets for all 36 advancement paths and broader content/balance testing remain future work.

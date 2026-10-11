@@ -20,18 +20,12 @@ public final class ClassAdvancementManager {
 
     public static void handleLogin(ServerPlayer player) {
         PROMPTED.remove(player.getUUID());
-        tryPrompt(player);
+        // Class advancement is now obtained through rarity-based Class Books.
+        // Existing advancements remain untouched on login.
     }
 
     public static void tick(ServerPlayer player) {
-        if (player == null
-                || player.tickCount % 20 != 0
-                || !ClassManager.isAdvancementEligible(player)
-                || PROMPTED.contains(player.getUUID())) {
-            return;
-        }
-
-        tryPrompt(player);
+        // No forced Level 20 selection screen. Progression is book-driven.
     }
 
     public static void openSelection(ServerPlayer player) {
@@ -43,19 +37,20 @@ public final class ClassAdvancementManager {
             return;
         }
 
-        PROMPTED.add(player.getUUID());
-        CyberClassesNetwork.sendToPlayer(
-            player,
-            new OpenClassAdvancementPacket(
-                baseClass.id()
-            )
-        );
+        player.sendSystemMessage(Component.literal(
+                "Advanced classes now require a Rare or Legendary Class Book. "
+                + "Books are found as monster loot and require their own Cyber Level.")
+                .withStyle(ChatFormatting.YELLOW));
     }
 
     public static boolean complete(
         ServerPlayer player,
         ClassAdvancement advancement
     ) {
+        // Reject legacy/unprompted GUI submissions. Books use the validated
+        // ClassBookItem path instead of this old level-up button flow.
+        return false;
+        /*
         if (!ClassManager.setAdvancement(
                 player,
                 advancement
@@ -81,6 +76,7 @@ public final class ClassAdvancementManager {
         );
 
         return true;
+        */
     }
 
     public static void forceSet(
@@ -103,9 +99,7 @@ public final class ClassAdvancementManager {
         ClassManager.clearAdvancement(player);
         PROMPTED.remove(player.getUUID());
 
-        if (ClassManager.isAdvancementEligible(player)) {
-            openSelection(player);
-        }
+        // Clearing advancement does not auto-reopen the old chooser.
     }
 
     public static void onLogout(ServerPlayer player) {
@@ -114,9 +108,5 @@ public final class ClassAdvancementManager {
         }
     }
 
-    private static void tryPrompt(ServerPlayer player) {
-        if (ClassManager.isAdvancementEligible(player)) {
-            openSelection(player);
-        }
-    }
+    // Admin tools can still force-set advancements without consuming books.
 }

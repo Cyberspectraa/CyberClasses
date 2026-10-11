@@ -1,6 +1,6 @@
 # CyberClasses
 
-**Current version: 0.2.1-alpha.8** · Minecraft **1.20.1** · Forge **47.4.10** · Java **17**
+**Current version: 0.2.1-alpha.9** · Minecraft **1.20.1** · Forge **47.4.10** · Java **17**
 
 CyberClasses defines the shared player and Wild NPC class system for CyberSpectra Season 2: class selection, gear and magic restrictions, mana tiers, advancement paths and class-related quest unlocks.
 
@@ -58,6 +58,13 @@ The 36 class advancement paths retain a **baseline Cyber Level 20 definition**, 
 | Druid | Shaman, Wildspeaker, Stormcaller |
 | Bard | Skald, Minstrel, Mesmer |
 | Alchemist | Apothecary, Bombardier, Transmuter |
+
+
+### Creative inventory and class-change VFX
+
+All four Class Books are available together in the dedicated **CyberClasses** Creative inventory tab, as well as the regular Ingredients tab. Creative or `/give` books are unattuned until first right-click; the next valid use consumes/applies the class change.
+
+Successful transformations play a magical visual/sound burst. When **Photon** and **CyberServer** are installed, CyberClasses uses the existing `cyberserver:summoning` Photon effect at a much smaller scale, based on book rarity, without modifying CyberServer's intro. Without that Photon resource, class changes still succeed and use vanilla enchanting/end-rod particles and sounds. The custom class-only Photon asset can be replaced independently in a later visual pass.
 
 ### Class Book rarity and use
 

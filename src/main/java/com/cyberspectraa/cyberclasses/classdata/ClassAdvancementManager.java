@@ -2,111 +2,53 @@ package com.cyberspectraa.cyberclasses.classdata;
 
 import com.cyberspectraa.cyberclasses.network.CyberClassesNetwork;
 import com.cyberspectraa.cyberclasses.network.packet.CloseClassAdvancementPacket;
-import com.cyberspectraa.cyberclasses.network.packet.OpenClassAdvancementPacket;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
-
+/**
+ * Class advancement no longer interrupts the player at Level 20.
+ * A compatible Rare/Legendary Class Book is now required to advance.
+ * Existing saved advancements and operator-controlled advancements persist.
+ */
 public final class ClassAdvancementManager {
-    private static final Set<UUID> PROMPTED =
-        new HashSet<>();
-
-    private ClassAdvancementManager() {
-    }
+    private ClassAdvancementManager() {}
 
     public static void handleLogin(ServerPlayer player) {
-        PROMPTED.remove(player.getUUID());
-        // Class advancement is now obtained through rarity-based Class Books.
-        // Existing advancements remain untouched on login.
+        // Intentionally no forced popup at the level threshold.
     }
 
     public static void tick(ServerPlayer player) {
-        // No forced Level 20 selection screen. Progression is book-driven.
+        // Books trigger advancement on use; no per-tick window checks.
     }
 
     public static void openSelection(ServerPlayer player) {
-        CyberClass baseClass =
-            ClassManager.getClass(player).orElse(null);
-
-        if (baseClass == null
-                || !ClassManager.isAdvancementEligible(player)) {
-            return;
+        if (player != null) {
+            player.sendSystemMessage(Component.literal(
+                    "Class advancement now requires a Rare or Legendary Class Book. "
+                    + "Hunt monsters and powerful bosses to find them.")
+                    .withStyle(ChatFormatting.YELLOW));
         }
-
-        player.sendSystemMessage(Component.literal(
-                "Advanced classes now require a Rare or Legendary Class Book. "
-                + "Books are found as monster loot and require their own Cyber Level.")
-                .withStyle(ChatFormatting.YELLOW));
     }
 
-    public static boolean complete(
-        ServerPlayer player,
-        ClassAdvancement advancement
-    ) {
-        // Reject legacy/unprompted GUI submissions. Books use the validated
-        // ClassBookItem path instead of this old level-up button flow.
+    /** Legacy GUI packets cannot bypass the book and rarity requirements. */
+    public static boolean complete(ServerPlayer player, ClassAdvancement advancement) {
         return false;
-        /*
-        if (!ClassManager.setAdvancement(
-                player,
-                advancement
-        )) {
-            return false;
-        }
-
-        PROMPTED.remove(player.getUUID());
-
-        CyberClassesNetwork.sendToPlayer(
-            player,
-            new CloseClassAdvancementPacket()
-        );
-
-        player.sendSystemMessage(
-            Component.literal("Class Advanced: ")
-                .withStyle(ChatFormatting.GOLD)
-                .append(
-                    Component.literal(
-                        advancement.displayName()
-                    ).withStyle(ChatFormatting.YELLOW)
-                )
-        );
-
-        return true;
-        */
     }
 
-    public static void forceSet(
-        ServerPlayer player,
-        ClassAdvancement advancement
-    ) {
-        ClassManager.forceSetAdvancement(
-            player,
-            advancement
-        );
-        PROMPTED.remove(player.getUUID());
-
-        CyberClassesNetwork.sendToPlayer(
-            player,
-            new CloseClassAdvancementPacket()
-        );
+    public static void forceSet(ServerPlayer player, ClassAdvancement advancement) {
+        if (player == null || advancement == null) return;
+        ClassManager.forceSetAdvancement(player, advancement);
+        CyberClassesNetwork.sendToPlayer(player, new CloseClassAdvancementPacket());
     }
 
     public static void reset(ServerPlayer player) {
+        if (player == null) return;
         ClassManager.clearAdvancement(player);
-        PROMPTED.remove(player.getUUID());
-
-        // Clearing advancement does not auto-reopen the old chooser.
+        CyberClassesNetwork.sendToPlayer(player, new CloseClassAdvancementPacket());
     }
 
     public static void onLogout(ServerPlayer player) {
-        if (player != null) {
-            PROMPTED.remove(player.getUUID());
-        }
+        // No temporary state; class data is persistent.
     }
-
-    // Admin tools can still force-set advancements without consuming books.
 }

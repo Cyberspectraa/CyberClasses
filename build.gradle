@@ -46,7 +46,9 @@ sourceSets {
         java.srcDir 'fxgen/src/main/java'
         resources.srcDirs = []
         compileClasspath += sourceSets.main.compileClasspath
-        runtimeClasspath += sourceSets.main.runtimeClasspath
+        // Main runtimeClasspath includes ':classes' (and processResources).
+        // Use dependency-only classpath to avoid processResources -> fxgen -> classes cycle.
+        runtimeClasspath += sourceSets.main.compileClasspath
     }
 }
 

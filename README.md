@@ -1,6 +1,6 @@
 # CyberClasses
 
-**Current version: 0.2.1-alpha.7** · Minecraft **1.20.1** · Forge **47.4.10** · Java **17**
+**Current version: 0.2.1-alpha.8** · Minecraft **1.20.1** · Forge **47.4.10** · Java **17**
 
 CyberClasses defines the shared player and Wild NPC class system for CyberSpectra Season 2: class selection, gear and magic restrictions, mana tiers, advancement paths and class-related quest unlocks.
 
@@ -40,9 +40,9 @@ The server-side restriction engine enforces effective class/advancement rules fo
 
 Item tags allow additional weapon and armour types from other mods to be categorised without rewriting class logic. Default classification also handles supported vanilla items. Restrictions are evaluated from the player's **effective class path**, including any selected advancement; not all classes may use the same equipment or spell access.
 
-## Class advancement — Cyber Level 20
+## Class advancement — earned through Class Books
 
-At **Cyber Level 20**, a player can choose one of **three paths for their base class**, for **36 defined advancements**:
+The 36 class advancement paths retain a **baseline Cyber Level 20 definition**, but **as of 0.2.1-alpha.8 players no longer receive a free advancement-selection popup**. They need a level-gated **Class Book**, with different rarities unlocking different class paths:
 
 | Base class | Advancement choices |
 | --- | --- |
@@ -59,7 +59,20 @@ At **Cyber Level 20**, a player can choose one of **three paths for their base c
 | Bard | Skald, Minstrel, Mesmer |
 | Alchemist | Apothecary, Bombardier, Transmuter |
 
-A dedicated advancement screen and server-side state store the choice. Advancements **currently define equipment permissions, armour limits, magic access and mana tiers** for the effective class path. Their flavour descriptions (for example, necromancy, assassination or potion mastery) are **not a guarantee that bespoke active mechanics for every path already exist**.
+### Class Book rarity and use
+
+| Book | Minimum Cyber Level | Effect |
+| --- | ---: | --- |
+| **Common** | 8 | Changes to one of six ordinary base classes (Knight, Archer, Rogue, Ranger, Monk or Alchemist) |
+| **Uncommon** | 20 | Changes to any of the 12 selectable base classes |
+| **Rare** | 30 | Grants a **named advancement for the player's current base class** |
+| **Legendary** | 50 | Grants a **named advanced path from any base class**, changing base class if required |
+
+Books contain a **specific class or advancement target**, visible in their item name and tooltip. They are consumed **only after** a valid class change and level checks pass. A Rare book cannot be used by an incompatible base class. Books obtained via creative mode or `/give` begin unattuned; the first right-click assigns a random target to that book without consuming it, and the next right-click applies its effect if eligible. Players can trade targeted books.
+
+**Survival acquisition:** a server-side hostile-mob loot roll (2.6% per qualifying kill) awards a book with weighted rarity; Wither and Ender Dragon kills yield a guaranteed Rare or Legendary book. Books use vanilla book/enchanted book textures, so no texture-pack dependency is required.
+
+Existing saved class advancements remain valid. Staff/admin class setters remain available for testing. Advanced class paths **currently define equipment permissions, armour limits, magic access and mana tiers**; their flavour descriptions do **not** guarantee bespoke active mechanics for every path.
 
 Class and advancement definitions are also exposed to Wild CyberNpc entities via the lightweight `NpcClassRegistry` bridge.
 
@@ -85,7 +98,7 @@ Admin commands (permission level 2):
 /cyberclasses reset <player>
 ```
 
-`/cyberclasses advance` opens advancement selection subject to its eligibility checks; admin setters are testing/maintenance tools, not substitutes for the normal progression flow.
+`/cyberclasses advance` now explains the Class Book requirement rather than opening a free advancement chooser; admin setters are testing/maintenance tools, not substitutes for the normal progression flow.
 
 ## Integrations and status
 
@@ -95,4 +108,4 @@ Admin commands (permission level 2):
 - **Iron's Spells 'n Spellbooks:** mana tiers and player spellcasting restrictions when available; spellcasting NPC classes are conditionally generated where applicable.
 - **CyberServer:** world-owned policy can gate natural Wild NPC class advancement.
 
-This is an **alpha gameplay framework**. Class rules, selection and advancement definitions exist, but unique signature skill sets for all 36 advancement paths and broader content/balance testing remain future work.
+This is an **alpha gameplay framework**. Class Books now provide a survival-based advancement route, but unique signature skill sets for all 36 advancement paths and broader content/balance testing remain future work.

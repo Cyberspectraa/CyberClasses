@@ -2,6 +2,7 @@ package com.cyberspectraa.cyberclasses;
 
 import com.cyberspectraa.cyberclasses.network.CyberClassesNetwork;
 import com.cyberspectraa.cyberclasses.registry.ModItems;
+import com.cyberspectraa.cyberclasses.registry.ModCreativeTabs;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -18,6 +19,7 @@ public final class CyberClasses {
         CyberClassesNetwork.init();
         IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
         ModItems.ITEMS.register(modBus);
+        ModCreativeTabs.TABS.register(modBus);
         modBus.addListener(this::addCreativeBooks);
 
         MinecraftForge.EVENT_BUS.register(

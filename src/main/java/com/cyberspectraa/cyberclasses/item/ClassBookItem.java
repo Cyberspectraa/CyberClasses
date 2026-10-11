@@ -4,6 +4,7 @@ import com.cyberspectraa.cyberclasses.classdata.ClassAdvancement;
 import com.cyberspectraa.cyberclasses.classdata.ClassManager;
 import com.cyberspectraa.cyberclasses.classdata.CyberClass;
 import com.cyberspectraa.cyberclasses.classdata.CyberProgressionBridge;
+import com.cyberspectraa.cyberclasses.compat.PhotonClassChangeEffects;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -202,8 +203,9 @@ public final class ClassBookItem extends Item {
                 .append(Component.literal(tier.advanced
                         ? advancement.displayName() : chosen.displayName())
                         .withStyle(tier.color)));
-        level.playSound(null, player.blockPosition(),
-                SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS, 0.9F, 1.1F);
+        // Play the optional Photon ceremony only after a valid, successful
+        // class change. Invalid or insufficient-level books produce no VFX.
+        PhotonClassChangeEffects.play(player, tier);
         if (!player.getAbilities().instabuild) stack.shrink(1);
         return InteractionResultHolder.success(stack);
     }

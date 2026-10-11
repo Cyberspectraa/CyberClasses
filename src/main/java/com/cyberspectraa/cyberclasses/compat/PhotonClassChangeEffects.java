@@ -1,6 +1,5 @@
 package com.cyberspectraa.cyberclasses.compat;
 
-import com.cyberspectraa.cyberclasses.CyberClasses;
 import com.cyberspectraa.cyberclasses.item.ClassBookItem;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.particles.ParticleTypes;
@@ -49,7 +48,7 @@ public final class PhotonClassChangeEffects {
             try {
                 photonPlayed = server.getCommands().performPrefixedCommand(source, command) > 0;
             } catch (RuntimeException error) {
-                CyberClasses.LOGGER.warn("Photon class-change effect unavailable; using vanilla particles", error);
+                org.slf4j.LoggerFactory.getLogger(PhotonClassChangeEffects.class).warn("Photon class-change effect unavailable; using vanilla particles", error);
             }
         }
 

@@ -1,5 +1,9 @@
 {
   "cyberclasses.screen.title": "Choose Your Class",
   "cyberclasses.screen.confirm": "Choose Class",
-  "cyberclasses.message.restricted": "Your class cannot use %s"
+  "cyberclasses.message.restricted": "Your class cannot use %s",
+  "item.cyberclasses.common_class_book": "Common Class Book",
+  "item.cyberclasses.uncommon_class_book": "Uncommon Class Book",
+  "item.cyberclasses.rare_class_book": "Rare Class Book",
+  "item.cyberclasses.legendary_class_book": "Legendary Class Book"
 }

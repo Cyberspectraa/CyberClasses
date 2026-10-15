@@ -90,7 +90,7 @@ public final class ClassCreatorScreen extends Screen {
         graphics.drawCenteredString(
             font,
             Component.literal(
-                "Race chosen. Your class controls combat gear, mana and future advancements."
+                "Your class sets which weapons, armour and spells you can use."
             ),
             centerX,
             top + 18,
@@ -166,7 +166,7 @@ public final class ClassCreatorScreen extends Screen {
         graphics.drawCenteredString(
             font,
             Component.literal(
-                "First advancement unlocks at Cyber Level 20"
+                "Advanced books: Rare Lv 30, Legendary Lv 50"
             ),
             centerX,
             top + 178,

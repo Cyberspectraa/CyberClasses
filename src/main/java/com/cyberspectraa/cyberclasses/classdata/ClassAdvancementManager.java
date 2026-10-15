@@ -25,8 +25,8 @@ public final class ClassAdvancementManager {
     public static void openSelection(ServerPlayer player) {
         if (player != null) {
             player.sendSystemMessage(Component.literal(
-                    "Class advancement now requires a Rare or Legendary Class Book. "
-                    + "Hunt monsters and powerful bosses to find them.")
+                    "Use a Rare or Legendary Class Book to advance. "
+                    + "Find them as loot from monsters and bosses.")
                     .withStyle(ChatFormatting.YELLOW));
         }
     }

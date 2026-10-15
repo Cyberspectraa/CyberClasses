@@ -108,7 +108,7 @@ public final class ClassAdvancementScreen extends Screen {
             font,
             Component.literal(
                 baseClass.displayName()
-                    + " — Level 20 Advancement"
+                    + " — Advancement Path"
             ),
             centerX,
             top + 18,

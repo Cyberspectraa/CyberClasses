@@ -10,91 +10,91 @@ import java.util.Optional;
 public enum CyberClass {
     CLASSLESS(
         "classless", "Classless",
-        "No formal combat class.",
+        "No formal class or special combat training.",
         false, false, false, false, false,
         ArmorWeight.NONE, ManaTier.NONE,
         false, 65, false
     ),
     KNIGHT(
         "knight", "Knight",
-        "Heavy frontline fighter built around melee weapons and shields.",
+        "Heavy armour, swords, axes and shields. No spells.",
         true, true, false, false, true,
         ArmorWeight.HEAVY, ManaTier.NONE,
         true, 6, false
     ),
     BERSERKER(
         "berserker", "Berserker",
-        "Aggressive melee fighter who trades defence for raw pressure.",
+        "Swords and axes in heavy armour, without a shield.",
         true, true, false, false, false,
         ArmorWeight.HEAVY, ManaTier.NONE,
         true, 5, false
     ),
     ARCHER(
         "archer", "Archer",
-        "Dedicated ranged fighter with a sword as a backup weapon.",
+        "Ranged weapons, with a sword for close fights.",
         true, false, true, false, false,
         ArmorWeight.MEDIUM, ManaTier.NONE,
         true, 8, false
     ),
     RANGER(
         "ranger", "Ranger",
-        "Flexible wilderness fighter using blades, axes and ranged weapons.",
+        "Swords, axes and bows, with medium armour.",
         true, true, true, false, false,
         ArmorWeight.MEDIUM, ManaTier.NONE,
         true, 3, false
     ),
     ROGUE(
         "rogue", "Rogue",
-        "Light-armoured skirmisher focused on blades, speed and positioning.",
+        "Light armour and a sword. No shields or spells.",
         true, false, false, false, false,
         ArmorWeight.LIGHT, ManaTier.NONE,
         true, 5, false
     ),
     MONK(
         "monk", "Monk",
-        "Unarmed mobile fighter who relies on discipline instead of equipment.",
+        "Light armour and unarmed fighting.",
         false, false, false, false, false,
         ArmorWeight.LIGHT, ManaTier.NONE,
         true, 3, false
     ),
     MAGE(
         "mage", "Mage",
-        "Pure spellcaster with the largest mana pool and light armour.",
+        "A large mana pool and spells, but only light armour.",
         false, false, false, true, false,
         ArmorWeight.LIGHT, ManaTier.VERY_HIGH,
         true, 3, true
     ),
     CLERIC(
         "cleric", "Cleric",
-        "Armoured support caster combining axes, shields and restorative magic.",
+        "Axes, shields and magic, with medium armour.",
         false, true, false, true, true,
         ArmorWeight.MEDIUM, ManaTier.MEDIUM,
         true, 2, true
     ),
     SPELLBLADE(
         "spellblade", "Spellblade",
-        "Hybrid sword-and-magic fighter with a deliberately smaller mana pool.",
+        "Sword and spellbook, with a smaller mana pool.",
         true, false, false, true, false,
         ArmorWeight.MEDIUM, ManaTier.LOW,
         true, 3, true
     ),
     DRUID(
         "druid", "Druid",
-        "Nature-focused caster with strong mana and flexible survival utility.",
+        "High mana for casting spells; medium armour.",
         false, false, false, true, false,
         ArmorWeight.MEDIUM, ManaTier.HIGH,
         true, 2, true
     ),
     BARD(
         "bard", "Bard",
-        "Support caster built around buffs, control and group utility.",
+        "Sword and spells, with light armour and medium mana.",
         true, false, false, true, false,
         ArmorWeight.LIGHT, ManaTier.MEDIUM,
         true, 2, true
     ),
     ALCHEMIST(
         "alchemist", "Alchemist",
-        "Potion and utility specialist who relies on crafted resources rather than mana.",
+        "Potions and supplies instead of spells or heavy weapons.",
         false, false, false, false, false,
         ArmorWeight.LIGHT, ManaTier.NONE,
         true, 2, false

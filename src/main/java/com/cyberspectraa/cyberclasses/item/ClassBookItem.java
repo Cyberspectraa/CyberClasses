@@ -127,7 +127,7 @@ public final class ClassBookItem extends Item {
                 : "Changes your base class and clears its previous advancement")
                 .withStyle(ChatFormatting.DARK_GRAY));
         if (targetClass(stack) == null) tooltip.add(
-                Component.literal("Right-click to discover the class in this book.")
+                Component.literal("Right-click to reveal this book's class.")
                         .withStyle(ChatFormatting.YELLOW));
         else if (tier == Tier.RARE) tooltip.add(
                 Component.literal("Only usable by a matching base class.")
@@ -182,7 +182,7 @@ public final class ClassBookItem extends Item {
         }
         if (tier.advanced && oldAdvancement == advancement) {
             player.displayClientMessage(Component.literal(
-                    "You have already mastered this advancement."), true);
+                    "You already have this advancement."), true);
             return InteractionResultHolder.fail(stack);
         }
         if (!tier.advanced && before == chosen && oldAdvancement == null) {
@@ -198,7 +198,7 @@ public final class ClassBookItem extends Item {
             return InteractionResultHolder.fail(stack);
         }
 
-        player.sendSystemMessage(Component.literal("Class transformed: ")
+        player.sendSystemMessage(Component.literal("Class changed to: ")
                 .withStyle(ChatFormatting.GOLD)
                 .append(Component.literal(tier.advanced
                         ? advancement.displayName() : chosen.displayName())

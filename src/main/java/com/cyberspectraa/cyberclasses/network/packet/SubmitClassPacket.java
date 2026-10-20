@@ -8,19 +8,21 @@ import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
-public record SubmitClassPacket(String classId) {
+public record SubmitClassPacket(String classId, boolean starterKit) {
     public static void encode(
         SubmitClassPacket packet,
         FriendlyByteBuf buffer
     ) {
         buffer.writeUtf(packet.classId(), 32);
+        buffer.writeBoolean(packet.starterKit());
     }
 
     public static SubmitClassPacket decode(
         FriendlyByteBuf buffer
     ) {
         return new SubmitClassPacket(
-            buffer.readUtf(32)
+            buffer.readUtf(32),
+            buffer.readBoolean()
         );
     }
 
@@ -36,7 +38,8 @@ public record SubmitClassPacket(String classId) {
                 .ifPresent(playerClass ->
                     ClassCreationManager.complete(
                         player,
-                        playerClass
+                        playerClass,
+                        packet.starterKit()
                     )
                 );
         }

@@ -8,17 +8,21 @@ import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
-public record OpenClassCreatorPacket() {
+public record OpenClassCreatorPacket(boolean guildMode) {
+    public OpenClassCreatorPacket() {
+        this(false);
+    }
     public static void encode(
         OpenClassCreatorPacket packet,
         FriendlyByteBuf buffer
     ) {
+        buffer.writeBoolean(packet.guildMode());
     }
 
     public static OpenClassCreatorPacket decode(
         FriendlyByteBuf buffer
     ) {
-        return new OpenClassCreatorPacket();
+        return new OpenClassCreatorPacket(buffer.readBoolean());
     }
 
     public static void handle(
@@ -29,7 +33,7 @@ public record OpenClassCreatorPacket() {
 
         DistExecutor.unsafeRunWhenOn(
             Dist.CLIENT,
-            () -> ClientPacketHandlers::openClassCreator
+            () -> () -> ClientPacketHandlers.openClassCreator(packet.guildMode())
         );
 
         context.setPacketHandled(true);

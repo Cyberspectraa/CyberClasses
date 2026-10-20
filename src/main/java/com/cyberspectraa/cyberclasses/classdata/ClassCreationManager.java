@@ -9,6 +9,8 @@ import net.minecraftforge.fml.ModList;
 import java.lang.reflect.Method;
 
 import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -19,6 +21,8 @@ public final class ClassCreationManager {
 
     private static final Set<UUID> OPEN_SENT =
         new HashSet<>();
+    private static final Map<UUID, Long> GUILD_SELECTION = new HashMap<>();
+    private static final long GUILD_SESSION_TICKS = 2400L;
 
     private ClassCreationManager() {
     }
@@ -29,7 +33,9 @@ public final class ClassCreationManager {
             return;
         }
 
-        if (hasCompletedRace(player)) {
+        // When CyberNpc's town intro is configured, class selection belongs
+        // to the Adventurers' Guild AFTER the summoning and Pope meeting.
+        if (hasCompletedRace(player) && !guildRegistrationEnabled(player)) {
             beginSelection(player);
         }
     }
@@ -44,6 +50,10 @@ public final class ClassCreationManager {
             return;
         }
 
+        if (guildRegistrationEnabled(player)) {
+            // A classless player may explore town without being immobilised.
+            return;
+        }
         CreationHoldManager.tick(player);
 
         if (!OPEN_SENT.contains(player.getUUID())) {
@@ -51,24 +61,59 @@ public final class ClassCreationManager {
         }
     }
 
+    /**
+     * Reflection entry point used by CyberNpc's Guild Receptionist.
+     * Only a completed intro can authorise this server-side session.
+     */
+    public static boolean openAtGuild(ServerPlayer player) {
+        if (player == null || ClassManager.hasClass(player)
+                || !hasCompletedRace(player)
+                || !guildRegistrationAvailable(player)) return false;
+        GUILD_SELECTION.put(player.getUUID(),
+                player.level().getGameTime() + GUILD_SESSION_TICKS);
+        OPEN_SENT.add(player.getUUID());
+        CyberClassesNetwork.sendToPlayer(player, new OpenClassCreatorPacket(true));
+        return true;
+    }
+
     public static void complete(
         ServerPlayer player,
-        CyberClass playerClass
+        CyberClass playerClass,
+        boolean starterKit
     ) {
-        if (playerClass == null || ClassManager.hasClass(player)) {
+        if (player == null || playerClass == null || !playerClass.playerSelectable()
+                || ClassManager.hasClass(player) || !hasCompletedRace(player)) return;
+
+        boolean guildMode = guildRegistrationEnabled(player);
+        if (guildMode) {
+            Long expires = GUILD_SELECTION.get(player.getUUID());
+            if (expires == null || player.level().getGameTime() > expires
+                    || !guildRegistrationAvailable(player)) return;
+        } else if (!OPEN_SENT.contains(player.getUUID())) {
             return;
         }
 
         ClassManager.setClass(player, playerClass);
+        if (!ClassManager.hasClass(player)) return;
         OPEN_SENT.remove(player.getUUID());
+        GUILD_SELECTION.remove(player.getUUID());
+        StarterKitService.complete(player, playerClass, starterKit);
         CyberClassesNetwork.sendToPlayer(
             player,
             new CloseClassCreatorPacket()
         );
-        // Summoning begins only after BOTH race and class are confirmed.
-        // Avoid exposing the player between the creator closing and respawn.
-        if (summoningHandoff(player)) CreationHoldManager.forget(player);
-        else CreationHoldManager.release(player);
+        if (!guildMode) {
+            // Worlds without the configured CyberNpc introduction preserve
+            // the original class-before-summoning flow.
+            if (summoningHandoff(player)) CreationHoldManager.forget(player);
+            else CreationHoldManager.release(player);
+        }
+    }
+
+    // Compatibility for older internal callsites; new player packets carry
+    // the kit decision explicitly.
+    public static void complete(ServerPlayer player, CyberClass playerClass) {
+        complete(player, playerClass, true);
     }
 
     public static void forceSet(
@@ -77,6 +122,7 @@ public final class ClassCreationManager {
     ) {
         ClassManager.setClass(player, playerClass);
         OPEN_SENT.remove(player.getUUID());
+        GUILD_SELECTION.remove(player.getUUID());
         CreationHoldManager.release(player);
         CyberClassesNetwork.sendToPlayer(
             player,
@@ -87,14 +133,16 @@ public final class ClassCreationManager {
     public static void reset(ServerPlayer player) {
         ClassManager.clearClass(player);
         OPEN_SENT.remove(player.getUUID());
+        GUILD_SELECTION.remove(player.getUUID());
 
-        if (hasCompletedRace(player)) {
+        if (hasCompletedRace(player) && !guildRegistrationEnabled(player)) {
             beginSelection(player);
         }
     }
 
     public static void onLogout(ServerPlayer player) {
         OPEN_SENT.remove(player.getUUID());
+        GUILD_SELECTION.remove(player.getUUID());
         CreationHoldManager.forget(player);
     }
 
@@ -115,6 +163,26 @@ public final class ClassCreationManager {
 
         return !root.contains(RACE_CREATED_KEY)
             || root.getBoolean(RACE_CREATED_KEY);
+    }
+
+    private static boolean guildRegistrationEnabled(ServerPlayer player) {
+        return introBoolean(player, "guildRegistrationEnabled");
+    }
+
+    private static boolean guildRegistrationAvailable(ServerPlayer player) {
+        return introBoolean(player, "guildRegistrationAvailable");
+    }
+
+    private static boolean introBoolean(ServerPlayer player, String method) {
+        if (player == null || !ModList.get().isLoaded("cybernpc")) return false;
+        try {
+            Class<?> intro = Class.forName(
+                    "com.cyberspectraa.cybernpc.intro.CyberIntroService");
+            return Boolean.TRUE.equals(
+                    intro.getMethod(method, ServerPlayer.class).invoke(null, player));
+        } catch (ReflectiveOperationException | RuntimeException ignored) {
+            return false;
+        }
     }
 
     private static boolean summoningHandoff(ServerPlayer player) {

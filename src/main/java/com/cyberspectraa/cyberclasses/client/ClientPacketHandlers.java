@@ -10,10 +10,14 @@ public final class ClientPacketHandlers {
     }
 
     public static void openClassCreator() {
+        openClassCreator(false);
+    }
+
+    public static void openClassCreator(boolean guildMode) {
         Minecraft minecraft = Minecraft.getInstance();
 
         if (!(minecraft.screen instanceof ClassCreatorScreen)) {
-            minecraft.setScreen(new ClassCreatorScreen());
+            minecraft.setScreen(new ClassCreatorScreen(guildMode));
         }
     }
 

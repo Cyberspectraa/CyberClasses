@@ -3,6 +3,7 @@ package com.cyberspectraa.cyberclasses.restriction;
 import com.cyberspectraa.cyberclasses.CyberClasses;
 import com.cyberspectraa.cyberclasses.classdata.ArmorWeight;
 import com.cyberspectraa.cyberclasses.classdata.ClassManager;
+import com.cyberspectraa.cyberclasses.classdata.CyberClass;
 import com.cyberspectraa.cyberclasses.classdata.ClassRules;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
@@ -15,6 +16,7 @@ import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ShieldItem;
 import net.minecraft.world.item.SwordItem;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -60,6 +62,10 @@ public final class ClassRestrictionEngine {
 
         return switch (type) {
             case SWORD -> rules.allowsSwords()
+                    // One low-tier exception for Mages; stone/iron/etc remain
+                    // restricted. Existing class restrictions stay intact.
+                    || (ClassManager.getClass(player).orElse(null) == CyberClass.MAGE
+                        && stack.is(Items.WOODEN_SWORD))
                 ? RestrictionResult.permit()
                 : RestrictionResult.denied("swords in combat");
             case AXE -> rules.allowsAxes()

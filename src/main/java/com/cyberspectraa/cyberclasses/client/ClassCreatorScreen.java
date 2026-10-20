@@ -17,10 +17,19 @@ public final class ClassCreatorScreen extends Screen {
         CyberClass.playerChoices();
 
     private int classIndex;
+    private boolean starterKit = true;
+    private Button starterButton;
     private Button classButton;
 
+    private final boolean guildMode;
+
     public ClassCreatorScreen() {
+        this(false);
+    }
+
+    public ClassCreatorScreen(boolean guildMode) {
         super(Component.literal("Choose Your Class"));
+        this.guildMode = guildMode;
     }
 
     @Override
@@ -55,12 +64,25 @@ public final class ClassCreatorScreen extends Screen {
                 .build()
         );
 
+        starterButton = addRenderableWidget(
+            Button.builder(
+                    Component.literal("Accept starter gear: YES"),
+                    button -> {
+                        starterKit = !starterKit;
+                        starterButton.setMessage(Component.literal(
+                                "Accept starter gear: " + (starterKit ? "YES" : "NO")));
+                    }
+                )
+                .bounds(centerX - 96, top + 183, 192, 20)
+                .build()
+        );
+
         addRenderableWidget(
             Button.builder(
                     Component.literal("Choose Class"),
                     button -> submit()
                 )
-                .bounds(centerX - 70, top + 194, 140, 22)
+                .bounds(centerX - 70, top + 207, 140, 22)
                 .build()
         );
     }
@@ -163,15 +185,7 @@ public final class ClassCreatorScreen extends Screen {
                 : 0xD18B8B
         );
 
-        graphics.drawCenteredString(
-            font,
-            Component.literal(
-                "Advanced books: Rare Lv 30, Legendary Lv 50"
-            ),
-            centerX,
-            top + 178,
-            0xE6C66B
-        );
+        // No text behind the starter-kit toggle.
 
         super.render(
             graphics,
@@ -183,12 +197,13 @@ public final class ClassCreatorScreen extends Screen {
 
     @Override
     public boolean shouldCloseOnEsc() {
-        return false;
+        // Only Guild registration can be postponed.
+        return guildMode;
     }
 
     @Override
     public boolean isPauseScreen() {
-        return true;
+        return !guildMode;
     }
 
     private void changeClass(int direction) {
@@ -213,7 +228,8 @@ public final class ClassCreatorScreen extends Screen {
     private void submit() {
         CyberClassesNetwork.sendToServer(
             new SubmitClassPacket(
-                currentClass().id()
+                currentClass().id(),
+                starterKit
             )
         );
     }

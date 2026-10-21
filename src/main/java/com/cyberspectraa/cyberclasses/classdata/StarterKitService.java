@@ -84,10 +84,10 @@ public final class StarterKitService {
                 put(kit, Items.LEATHER_BOOTS);
             }
             case MAGE -> {
-                // A book with NO spells. The Mage learns spells in the world.
-                // Their only allowed sword is this humble wooden one.
+                // No starter spells. Give a properly crafted WOODEN
+                // Tinkers' dagger for basic self-defence instead of a sword.
                 spellbook(kit);
-                put(kit, Items.WOODEN_SWORD);
+                woodenTinkersDagger(kit);
                 put(kit, Items.LEATHER_CHESTPLATE);
             }
             case CLERIC -> {
@@ -120,6 +120,40 @@ public final class StarterKitService {
         }
         put(kit, Items.BREAD, 6);
         return kit;
+    }
+
+    /**
+     * Build a fully configured Tinkers' Construct dagger with wood material,
+     * using Tinkers' own tool-building API (not a bare item with missing stats).
+     * Tinkers is optional for this mod; if absent, the empty spellbook and
+     * supplies still work without giving a disallowed wooden sword.
+     */
+    private static void woodenTinkersDagger(List<ItemStack> kit) {
+        if (!ModList.get().isLoaded("tconstruct")) return;
+        Item dagger = ForgeRegistries.ITEMS.getValue(
+                new ResourceLocation("tconstruct", "dagger"));
+        if (dagger == null || dagger == Items.AIR) return;
+        try {
+            Class<?> modifiable = Class.forName(
+                    "slimeknights.tconstruct.library.tools.item.IModifiable");
+            Class<?> materialId = Class.forName(
+                    "slimeknights.tconstruct.library.materials.definition.MaterialVariantId");
+            Class<?> material = Class.forName(
+                    "slimeknights.tconstruct.library.materials.definition.MaterialVariant");
+            Class<?> builder = Class.forName(
+                    "slimeknights.tconstruct.library.tools.helper.ToolBuildHandler");
+            Object woodId = materialId.getMethod("tryParse", String.class)
+                    .invoke(null, "tconstruct:wood");
+            if (woodId == null || !modifiable.isInstance(dagger)) return;
+            Object wood = material.getMethod("of", materialId).invoke(null, woodId);
+            Object created = builder.getMethod("createSingleMaterial", modifiable, material)
+                    .invoke(null, dagger, wood);
+            if (created instanceof ItemStack stack && !stack.isEmpty()) {
+                kit.add(stack);
+            }
+        } catch (ReflectiveOperationException | LinkageError exception) {
+            // No unfinished/uninitialised dagger is issued on API mismatch.
+        }
     }
 
     private static void spellbook(List<ItemStack> kit) {

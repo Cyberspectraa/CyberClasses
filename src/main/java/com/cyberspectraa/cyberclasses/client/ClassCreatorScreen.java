@@ -140,7 +140,8 @@ public final class ClassCreatorScreen extends Screen {
         graphics.drawCenteredString(
             font,
             Component.literal(
-                "Weapons: " + allowedWeapons(rules)
+                "Weapons: " + (playerClass == CyberClass.MAGE
+                    ? "Wooden Tinkers dagger" : allowedWeapons(rules))
             ),
             centerX,
             top + 118,

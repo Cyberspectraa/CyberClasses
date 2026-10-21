@@ -6,6 +6,8 @@ import com.cyberspectraa.cyberclasses.classdata.ClassManager;
 import com.cyberspectraa.cyberclasses.classdata.CyberClass;
 import com.cyberspectraa.cyberclasses.classdata.ClassRules;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -58,14 +60,18 @@ public final class ClassRestrictionEngine {
         ClassRules rules =
             ClassManager.getEffectiveRules(player);
 
+        // Mages may use *only* wood-material Tinkers daggers as their
+        // exception to sword restrictions. Other Tinkers daggers, stone/iron
+        // swords and vanilla wooden swords stay restricted.
+        if (ClassManager.getClass(player).orElse(null) == CyberClass.MAGE
+                && isWoodenTinkersDagger(stack)) {
+            return RestrictionResult.permit();
+        }
+
         WeaponType type = weaponType(stack);
 
         return switch (type) {
             case SWORD -> rules.allowsSwords()
-                    // One low-tier exception for Mages; stone/iron/etc remain
-                    // restricted. Existing class restrictions stay intact.
-                    || (ClassManager.getClass(player).orElse(null) == CyberClass.MAGE
-                        && stack.is(Items.WOODEN_SWORD))
                 ? RestrictionResult.permit()
                 : RestrictionResult.denied("swords in combat");
             case AXE -> rules.allowsAxes()
@@ -185,6 +191,25 @@ public final class ClassRestrictionEngine {
         return ArmorWeight.MEDIUM;
     }
 
+    private static boolean isTinkersDagger(ItemStack stack) {
+        ResourceLocation id = ForgeRegistries.ITEMS.getKey(stack.getItem());
+        return id != null && "tconstruct:dagger".equals(id.toString());
+    }
+
+    private static boolean isWoodenTinkersDagger(ItemStack stack) {
+        ResourceLocation id = ForgeRegistries.ITEMS.getKey(stack.getItem());
+        if (id == null || !"tconstruct:dagger".equals(id.toString())
+                || !stack.hasTag()) return false;
+        ListTag materials = stack.getTag().getList("tic_materials", Tag.TAG_STRING);
+        if (materials.isEmpty()) return false;
+        for (int i = 0; i < materials.size(); i++) {
+            String material = materials.getString(i);
+            if (!"tconstruct:wood".equals(material)
+                    && !material.startsWith("tconstruct:wood#")) return false;
+        }
+        return true;
+    }
+
     private static WeaponType weaponType(ItemStack stack) {
         Item item = stack.getItem();
 
@@ -202,6 +227,7 @@ public final class ClassRestrictionEngine {
         }
         if (stack.is(SWORDS)
                 || item instanceof SwordItem
+                || isTinkersDagger(stack)
                 || looksLikeSword(stack)) {
             return WeaponType.SWORD;
         }

@@ -1,6 +1,6 @@
 # CyberClasses
 
-**Current version: 0.2.1-alpha.10** · Minecraft **1.20.1** · Forge **47.4.10** · Java **17**
+**Current development version: 0.2.1-alpha.13** · Minecraft **1.20.1** · Forge **47.4.10** · Java **17**
 
 CyberClasses defines the shared player and Wild NPC class system for CyberSpectra Season 2: class selection, gear and magic restrictions, mana tiers, advancement paths and class-related quest unlocks.
 
@@ -8,7 +8,11 @@ CyberClasses defines the shared player and Wild NPC class system for CyberSpectr
 
 ## Character creation
 
-With the full ecosystem installed, a player selects a **race in CyberRaces**, then chooses a **class in CyberClasses** before the first-arrival cinematic. The creation flow holds newly arriving players safely until the required selections are complete; existing saved characters are handled through the migration/creation-state checks.
+In worlds with CyberNpc's configured introduction, the player selects a race first, completes summoning and the Pope's greeting, then registers a class at the Guild Receptionist. Worlds without configured intro retain the original class creator. Existing saved classes are preserved. No physical town-exit gate is required.
+
+Starter kits are optional, with a one-time saved choice per character. Magic classes start with empty spellbooks rather than learned spells. Mages receive a genuine Tinkers' Construct wooden dagger when Tinkers is installed; only all-wood Tinkers daggers are permitted as the Mage sword-class exception. Vanilla wooden swords and higher-material daggers are not allowed. Without Tinkers, the rest of the Mage kit is supplied without an invalid replacement dagger. See [guild registration](docs/GUILD_CLASS_REGISTRATION.md) (earlier wooden sword and boundary details superseded) and [Mage dagger](docs/MAGE_WOODEN_DAGGER.md).
+
+With CyberRaces 0.3.2-alpha.76, players earn Cyber XP only after choosing a class. Vanilla XP and already-earned Cyber Levels are unaffected. CyberQuest supplies the introductory guild quest.
 
 There are **12 player-selectable base classes**:
 
@@ -89,6 +93,8 @@ Class and advancement definitions are also exposed to Wild CyberNpc entities via
 
 ## Commands
 
+With CyberNpc 0.45.9+, the unified prefix is `/cyber classes`, e.g. `/cyber classes info` and `/cyber classes advance`. Original commands below remain valid. Operator checks are unchanged.
+
 Player commands:
 
 ```mcfunction
@@ -116,3 +122,9 @@ Admin commands (permission level 2):
 - **CyberServer:** world-owned policy can gate natural Wild NPC class advancement.
 
 This is an **alpha gameplay framework**. Class Books now provide a survival-based advancement route, but unique signature skill sets for all 36 advancement paths and broader content/balance testing remain future work.
+
+## Build and status
+
+Minecraft 1.20.1, Forge 47.4.10 and JDK 17. Use matching CyberClasses versions on client and server. The development-no-actions branch contains the current class source; the README-only refresh does not change the existing mod version. Follow the repository's Gradle build setup. Do not run GitHub Actions or change main.
+
+Current companions: CyberNpc 0.45.9, CyberRaces 0.3.2-alpha.76, CyberQuest 0.3.0-alpha.23 and CyberServer 0.2.7. Older [README](https://github.com/Cyberspectraa/CyberClasses/blob/3c1463835156ca6f2b2248687d065703dea414a2/README.md) remains available in Git history.

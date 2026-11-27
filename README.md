@@ -1,6 +1,6 @@
 # CyberClasses
 
-**Current development version: 0.2.1-alpha.14** · Minecraft **1.20.1** · Forge **47.4.10** · Java **17**
+**Current development version: 0.2.1-alpha.15** · Minecraft **1.20.1** · Forge **47.4.10** · Java **17**
 
 CyberClasses defines the shared player and Wild NPC class system for CyberSpectra Season 2: class selection, gear and magic restrictions, mana tiers, advancement paths and class-related quest unlocks.
 
@@ -83,7 +83,7 @@ Books contain a **specific class or advancement target**, visible in their item 
 
 **Survival acquisition:** a server-side hostile-mob loot roll (2.6% per qualifying kill) awards a book with weighted rarity; Wither and Ender Dragon kills yield a guaranteed Rare or Legendary book. Books use vanilla book/enchanted book textures, so no texture-pack dependency is required.
 
-Existing saved class advancements remain valid. Staff/admin class setters remain available for testing. Advanced class paths **currently define equipment permissions, armour limits, magic access and mana tiers**; their flavour descriptions do **not** guarantee bespoke active mechanics for every path.
+Existing saved class advancements remain valid. Class setters are no longer registered as commands; use normal class registration and the shared operator reset. Advanced class paths **currently define equipment permissions, armour limits, magic access and mana tiers**; their flavour descriptions do **not** guarantee bespoke active mechanics for every path.
 
 Class and advancement definitions are also exposed to Wild CyberNpc entities via the lightweight `NpcClassRegistry` bridge.
 
@@ -106,8 +106,17 @@ Operators use the retained `/cadmin` commands provided by the companion mods. No
 
 This is an **alpha gameplay framework**. Class Books now provide a survival-based advancement route, but unique signature skill sets for all 36 advancement paths and broader content/balance testing remain future work.
 
-## Build and status
+## Local Windows build
 
-Minecraft 1.20.1, Forge 47.4.10 and JDK 17. Use matching CyberClasses versions on client and server. The development-no-actions branch contains the current class source; the README-only refresh does not change the existing mod version. Follow the repository's Gradle build setup. Do not run GitHub Actions or change main.
+Use Java 17 and Git. The launcher matches the other Cyber mods, reusing pinned Gradle 8.8 from the shared local cache or downloading and checksum-verifying the official distribution when necessary.
 
-Current companions: CyberNpc 0.45.9, CyberRaces 0.3.2-alpha.76, CyberQuest 0.3.0-alpha.23 and CyberServer 0.2.7. Older [README](https://github.com/Cyberspectraa/CyberClasses/blob/3c1463835156ca6f2b2248687d065703dea414a2/README.md) remains available in Git history.
+```powershell
+cd "$HOME\CyberMods\CyberClasses"
+git switch development-no-actions
+git pull --ff-only
+.\build-local.bat
+```
+
+On success the launcher copies the versioned, reobfuscated JAR from `build/libs` to `CyberClasses.jar` in the repository root. The versioned archive remains in `build/libs`. If the build fails, inspect `build-local.log`; any existing root JAR may be from an earlier build. Both the root JAR and log are ignored by Git. Install matching JARs on client and server only after a successful build. No GitHub Actions or main-branch changes are needed.
+
+Current companions: CyberNpc 0.45.13, CyberRaces 0.3.2-alpha.77, CyberQuest 0.3.0-alpha.26 and CyberServer 0.2.8. Source changes require a local build and testing.

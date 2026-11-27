@@ -1,6 +1,6 @@
 # CyberClasses
 
-**Current development version: 0.2.1-alpha.13** · Minecraft **1.20.1** · Forge **47.4.10** · Java **17**
+**Current development version: 0.2.1-alpha.14** · Minecraft **1.20.1** · Forge **47.4.10** · Java **17**
 
 CyberClasses defines the shared player and Wild NPC class system for CyberSpectra Season 2: class selection, gear and magic restrictions, mana tiers, advancement paths and class-related quest unlocks.
 
@@ -93,25 +93,8 @@ Class and advancement definitions are also exposed to Wild CyberNpc entities via
 
 ## Commands
 
-With CyberNpc 0.45.9+, the unified prefix is `/cyber classes`, e.g. `/cyber classes info` and `/cyber classes advance`. Original commands below remain valid. Operator checks are unchanged.
-
-Player commands:
-
-```mcfunction
-/cyberclasses info
-/cyberclasses advance
-```
-
-Admin commands (permission level 2):
-
-```mcfunction
-/cyberclasses set <player> <class>
-/cyberclasses setadvancement <player> <advancement>
-/cyberclasses clearadvancement <player>
-/cyberclasses reset <player>
-```
-
-`/cyberclasses advance` now explains the Class Book requirement rather than opening a free advancement chooser; admin setters are testing/maintenance tools, not substitutes for the normal progression flow.
+This mod no longer registers its own commands. Register and advance classes through the normal gameplay interfaces.
+Operators use the retained `/cadmin` commands provided by the companion mods. No saved character or quest data was removed.
 
 ## Integrations and status
 

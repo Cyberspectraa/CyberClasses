@@ -32,9 +32,6 @@ public final class CyberClasses {
         MinecraftForge.EVENT_BUS.register(
             com.cyberspectraa.cyberclasses.event.ClassRestrictionEvents.class
         );
-        MinecraftForge.EVENT_BUS.register(
-            com.cyberspectraa.cyberclasses.command.CyberClassCommands.class
-        );
 
         if (ModList.get().isLoaded("irons_spellbooks")) {
             MinecraftForge.EVENT_BUS.register(
